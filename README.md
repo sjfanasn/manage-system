@@ -1,6 +1,6 @@
 # manage-system
 
-> vue后端管理系统
+> elm后端管理系统
 
 ## Build Setup
 
