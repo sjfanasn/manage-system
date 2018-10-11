@@ -1,12 +1,15 @@
 <template>
     <div>
-        用户列表
+        <!-- <head-top></head-top> -->
     </div>
 </template>
 
 <script>
+import headTop from '../components/headTop'
     export default {
-        
+        // components:{
+        //     headTop
+        // }
     }
 </script>
 

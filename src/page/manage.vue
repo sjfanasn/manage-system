@@ -2,11 +2,7 @@
 <div class="menu-left">
     <el-row style="height:100%">
         <el-col :span="4" style="min-height:100%;background-color:red;">
-            <el-menu :default-active="defaultActive" 
-            class="el-menu-vertical-demo"  
-            background-color="#303133" 
-            text-color="#fff" 
-            active-text-color="#ffd04b" router>
+            <el-menu :default-active="defaultActive" class="el-menu-vertical-demo" background-color="#303133" text-color="#fff" active-text-color="#ffd04b" router>
                 <el-menu-item index="manage">
                     <i class="el-icon-menu"></i>
                     <span slot="title">首页</span>
@@ -64,6 +60,7 @@
             </el-menu>
         </el-col>
         <el-col :span="20" style="height:100%;overflow:auto;">
+            <head-top></head-top>
             <keep-alive>
                 <router-view></router-view>
             </keep-alive>
@@ -73,21 +70,23 @@
 </template>
 
 <script>
+import headTop from '../components/headTop'
 export default {
-    data(){
+    data() {
         return {
-            isCollapse:true
+            isCollapse: true
         };
     },
-    created(){
-    },
-    computed:{
-        defaultActive(){
-            return this.$route.path.replace('/','');
+    created() {},
+    computed: {
+        defaultActive() {
+            return this.$route.path.replace('/', '');
         }
     },
-    methods: {
-    }
+    components: {
+        headTop
+    },
+    methods: {}
 }
 </script>
 

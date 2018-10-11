@@ -35,43 +35,53 @@ export default new Router({
                 },
                 {
                     path: '/addShop',
-                    component: addShop
+                    component: addShop,
+                    meta:['添加数据','添加商铺']
                 },
                 {
                     path: '/addGoods',
-                    component: addGoods
+                    component: addGoods,
+                    meta:['添加数据','添加商品']
                 },
                 {
                     path: '/shopList',
-                    component: shopList
+                    component: shopList,
+                    meta:['数据管理','商铺列表']
                 },
                 {
                     path: '/foodList',
-                    component: foodList
+                    component: foodList,
+                    meta:['数据管理','食品列表']
                 },
                 {
                     path: '/orderList',
-                    component: orderList
+                    component: orderList,
+                    meta:['数据管理','订单列表']
                 },
                 {
                     path: '/adminList',
-                    component: adminList
+                    component: adminList,
+                    meta:['数据管理','管理员列表']
                 },
                 {
                     path: '/userList',
-                    component: userList
+                    component: userList,
+                    meta:['数据管理','用户列表']
                 },
                 {
                     path: '/visitor',
-                    component: visitor
+                    component: visitor,
+                    meta:['图表','用户分布']
                 },
                 {
                     path: '/vueEdit',
-                    component: vueEdit
+                    component: vueEdit,
+                    meta:['文本编辑器','MarkDown']
                 },
                 {
                     path: '/adminSet',
-                    component: adminSet
+                    component: adminSet,
+                    meta:['设置','管理员设置']
                 },
             ]
         }
