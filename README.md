@@ -1,6 +1,6 @@
-# manage
+# manage-system
 
-> A Vue.js project
+> elm后端管理系统
 
 ## Build Setup
 
