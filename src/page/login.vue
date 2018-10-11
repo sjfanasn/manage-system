@@ -44,7 +44,7 @@ export default {
     },
     methods: {
         onSubmit() {
-            console.log("登录");
+            this.$router.push('manage');
         }
     }
 };
