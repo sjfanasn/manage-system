@@ -59,7 +59,7 @@
                 </el-submenu>
             </el-menu>
         </el-col>
-        <el-col :span="20" style="height:100%;overflow:auto;">
+        <el-col :span="20" style="height:100vh;overflow:auto;">
             <head-top></head-top>
             <keep-alive>
                 <router-view style="padding:20px;"></router-view>
