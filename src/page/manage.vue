@@ -1,7 +1,7 @@
 <template>
 <div class="menu-left">
-    <el-row style="height:100%">
-        <el-col :span="4" style="min-height:100%;background-color:red;">
+    <el-row style="height:100%;">
+        <el-col :span="4" style="height:100vh;background-color:rgb(50, 64, 87);">
             <el-menu :default-active="defaultActive" class="el-menu-vertical-demo" background-color="#303133" text-color="#fff" active-text-color="#ffd04b" router>
                 <el-menu-item index="manage">
                     <i class="el-icon-menu"></i>
@@ -62,7 +62,7 @@
         <el-col :span="20" style="height:100%;overflow:auto;">
             <head-top></head-top>
             <keep-alive>
-                <router-view></router-view>
+                <router-view style="padding:20px;"></router-view>
             </keep-alive>
         </el-col>
     </el-row>
@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import headTop from '../components/headTop'
+import headTop from "../components/headTop";
 export default {
     data() {
         return {
@@ -80,16 +80,18 @@ export default {
     created() {},
     computed: {
         defaultActive() {
-            return this.$route.path.replace('/', '');
+            return this.$route.path.replace("/", "");
         }
     },
     components: {
         headTop
     },
     methods: {}
-}
+};
 </script>
 
 <style scoped>
-
+.el-submenu .el-menu-item{
+    min-width: 0;
+}
 </style>
