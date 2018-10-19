@@ -75,13 +75,13 @@
                         <span style="margin-left: 10px">{{ scope.row.actTitle }}</span>
                     </template>
                 </el-table-column>
-               <el-table-column label="活动名称" width="120">
+                <el-table-column label="活动名称" width="120">
                     <template slot-scope="scope">
                         <i class="el-icon-time"></i>
                         <span style="margin-left: 10px">{{ scope.row.actName }}</span>
                     </template>
                 </el-table-column>
-                 <el-table-column label="活动详情" width="120">
+                <el-table-column label="活动详情" width="120">
                     <template slot-scope="scope">
                         <i class="el-icon-time"></i>
                         <span style="margin-left: 10px">{{ scope.row.actInfo }}</span>
@@ -480,38 +480,18 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '../style/common';
 .add-shop {
-    padding: 20px 450px !important;
+    padding: 20px 550px 20px 200px !important;
 }
 
 .el-autocomplete {
     width: 100%;
 }
-
-.avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+.el-form-item {
+    margin-bottom: 15px;
 }
-
-.avatar-uploader .el-upload:hover {
-    border-color: #409eff;
-}
-
-.avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 120px;
-    height: 120px;
-    line-height: 120px;
-    text-align: center;
-}
-
-.avatar {
-    width: 120px;
-    height: 120px;
-    display: block;
+.add-food {
+    margin-top: 30px;
 }
 </style>
