@@ -39,13 +39,13 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作">
             <template slot-scope="scope">
-                <el-button @click.native.prevent="editRow(scope.$index, tableData)" type="text" size="small">
+                <el-button @click.native.prevent="editRow(scope.$index, scope.row)" type="text" size="small">
                     编辑
                 </el-button>
-                <el-button @click.native.prevent="addFood(scope.$index, tableData)" type="text" size="small">
+                <el-button @click.native.prevent="addFood(scope.$index, scope.row)" type="text" size="small">
                     添加食品
                 </el-button>
-                <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
+                <el-button @click.native.prevent="deleteRow(scope.$index, scope.row)" type="text" size="small">
                     删除
                 </el-button>
             </template>
@@ -54,21 +54,21 @@
     <el-pagination @current-change="changePage" background :current-page.sync="currentPage" :page-size="pageSize" layout="total, prev, pager, next" :total="total">
     </el-pagination>
     <el-dialog title="修改店铺信息" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
+        <el-form :model="selectedRow">
             <el-form-item label="店铺名称" :label-width="formLabelWidth">
-                <el-input v-model="form.name" autocomplete="off"></el-input>
+                <el-input v-model="selectedRow.shopName" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="详细地址" :label-width="formLabelWidth">
-                <el-autocomplete v-model="form.shopAddr" :fetch-suggestions="querySearchAsync" placeholder="请输入地址" @select="handleSelect"></el-autocomplete>
+                <el-autocomplete v-model="selectedRow.shopAddress" :fetch-suggestions="querySearchAsync" placeholder="请输入地址" @select="handleSelect"></el-autocomplete>
             </el-form-item>
             <el-form-item label="店铺介绍" :label-width="formLabelWidth">
-                <el-input v-model="form.name" autocomplete="off"></el-input>
+                <el-input v-model="selectedRow.shopInfo" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="联系电话" :label-width="formLabelWidth">
-                <el-input v-model="form.name" autocomplete="off"></el-input>
+                <el-input v-model="selectedRow.phone" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="店铺分类" :label-width="formLabelWidth">
-                <el-cascader :options="form.options" v-model="selectedOptions3"></el-cascader>
+                <el-cascader :options="categoryOptions" v-model="currentCategory"></el-cascader>
             </el-form-item>
             <el-form-item label="商铺图片" :label-width="formLabelWidth">
                 <el-upload class="avatar-uploader" action="https://jsonplaceholder.typicode.com/posts/" :show-file-list="false">
@@ -89,7 +89,8 @@
 import {
     cityGuess,
     getShopCount,
-    getShoplist
+    getShoplist,
+    shopEdit
 } from "../service/getData.js";
 export default {
     data() {
@@ -105,79 +106,10 @@ export default {
             currentPage: 0,
             city: {},
             dialogFormVisible: false, // 表单是否可见
-            form: {
-                name: "",
-                region: "",
-                date1: "",
-                date2: "",
-                delivery: false,
-                type: [],
-                resource: "",
-                desc: "",
-                options: [{
-                        // 店铺分类
-                        value: "zhinan",
-                        label: "指南",
-                        children: [{
-                                value: "shejiyuanze",
-                                label: "设计原则"
-                            },
-                            {
-                                value: "daohang",
-                                label: "导航"
-                            }
-                        ]
-                    },
-                    {
-                        value: "zujian",
-                        label: "组件",
-                        children: [{
-                                value: "basic",
-                                label: "Basic"
-                            },
-                            {
-                                value: "form",
-                                label: "Form"
-                            },
-                            {
-                                value: "data",
-                                label: "Data"
-                            },
-                            {
-                                value: "notice",
-                                label: "Notice"
-                            },
-                            {
-                                value: "navigation",
-                                label: "Navigation"
-                            },
-                            {
-                                value: "others",
-                                label: "Others"
-                            }
-                        ]
-                    },
-                    {
-                        value: "ziyuan",
-                        label: "资源",
-                        children: [{
-                                value: "axure",
-                                label: "Axure Components"
-                            },
-                            {
-                                value: "sketch",
-                                label: "Sketch Templates"
-                            },
-                            {
-                                value: "jiaohu",
-                                label: "组件交互文档"
-                            }
-                        ]
-                    }
-                ]
-            },
-            selectedOptions3: ["zujian", "data", "tag"],
+            categoryOptions:[], // 分类列表
+            currentCategory: [], // 当前分类
             shopUrl: "",
+            selectedRow:{},// 当前商铺,获取要编辑店铺信息
             formLabelWidth: "120px"
         };
     },
@@ -189,7 +121,6 @@ export default {
             try {
                 this.city = await cityGuess();
                 const res = await getShopCount();
-
                 if (res.data.status === 1) {
                     this.total = res.data.count;
                 } else {
@@ -206,9 +137,31 @@ export default {
         deleteRow(index, rows) {
             rows.splice(index, 1);
         },
-        editRow(index, rows) {
-            console.log(index, rows);
+        // 获取食物类别
+        async editRow(index, row) {
             this.dialogFormVisible = true;
+            this.selectedRow = row;
+            this.currentCategory = row.type.split('/');
+            const shopInfo = await shopEdit();
+            for(const item of shopInfo.data){
+                if(shopInfo.data.length){
+                    let data = {
+                        label:item.name,
+                        value:item.name,
+                        children:[]
+                    }
+                    for(const val of item.sub_categories){
+                        data.children.push({
+                            label:val.name,
+                            value:val.name
+                        })
+                    }
+                    this.categoryOptions.push(data);
+                }
+            }
+        },
+        async getCategory(){
+
         },
         changePage(value) {
             this.currentPage = value;
@@ -248,7 +201,6 @@ export default {
             var results = queryString ?
                 restaurants.filter(this.createStateFilter(queryString)) :
                 restaurants;
-
             clearTimeout(this.timeout);
             this.timeout = setTimeout(() => {
                 cb(results);
