@@ -481,6 +481,7 @@ export default {
 
 <style lang="less" scoped>
 @import '../style/common';
+
 .add-shop {
     padding: 20px 550px 20px 200px !important;
 }
@@ -488,9 +489,11 @@ export default {
 .el-autocomplete {
     width: 100%;
 }
+
 .el-form-item {
     margin-bottom: 15px;
 }
+
 .add-food {
     margin-top: 30px;
 }
