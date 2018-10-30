@@ -71,15 +71,15 @@
                 <el-cascader :options="categoryOptions" v-model="currentCategory"></el-cascader>
             </el-form-item>
             <el-form-item label="商铺图片" :label-width="formLabelWidth">
-                <el-upload class="avatar-uploader" action="https://jsonplaceholder.typicode.com/posts/" :show-file-list="false">
-                    <img v-if="shopUrl" :src="shopUrl" class="avatar">
+                <el-upload class="avatar-uploader" :action="baseUrl+'v1/addimg/shop'" :show-file-list="false" :on-success="handleServiceAvatarScucess" :before-upload="beforeAvatarUpload">
+                    <img v-if="selectedRow.img_url" :src="baseUrl+'img/'+selectedRow.img_url" class="avatar">
                     <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                 </el-upload>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            <el-button type="primary" @click="saveEditClick">确 定</el-button>
         </div>
     </el-dialog>
 </div>
@@ -90,7 +90,9 @@ import {
     cityGuess,
     getShopCount,
     getShoplist,
-    shopEdit
+    shopEdit,
+    editShop,
+    searchplace
 } from "../service/getData.js";
 export default {
     data() {
@@ -106,10 +108,11 @@ export default {
             currentPage: 0,
             city: {},
             dialogFormVisible: false, // 表单是否可见
-            categoryOptions:[], // 分类列表
+            categoryOptions: [], // 分类列表
             currentCategory: [], // 当前分类
             shopUrl: "",
-            selectedRow:{},// 当前商铺,获取要编辑店铺信息
+            selectedRow: {}, // 当前商铺,获取要编辑店铺信息
+            baseUrl: "https://elm.cangdu.org/",
             formLabelWidth: "120px"
         };
     },
@@ -141,27 +144,50 @@ export default {
         async editRow(index, row) {
             this.dialogFormVisible = true;
             this.selectedRow = row;
-            this.currentCategory = row.type.split('/');
-            const shopInfo = await shopEdit();
-            for(const item of shopInfo.data){
-                if(shopInfo.data.length){
-                    let data = {
-                        label:item.name,
-                        value:item.name,
-                        children:[]
+            this.currentCategory = row.type.split("/");
+            try {
+                const shopInfo = await shopEdit();
+                for (const item of shopInfo.data) {
+                    if (shopInfo.data.length) {
+                        let data = {
+                            label: item.name,
+                            value: item.name,
+                            children: []
+                        };
+                        for (const val of item.sub_categories) {
+                            data.children.push({
+                                label: val.name,
+                                value: val.name
+                            });
+                        }
+                        this.categoryOptions.push(data);
                     }
-                    for(const val of item.sub_categories){
-                        data.children.push({
-                            label:val.name,
-                            value:val.name
-                        })
-                    }
-                    this.categoryOptions.push(data);
                 }
+            } catch (error) {
+                console.log(error);
             }
         },
-        async getCategory(){
-
+        async saveEditClick() {
+            try {
+                // Object.assign(this.selectedRow, this.address);
+                this.selectedRow.type = this.currentCategory.join('/');
+                const res = await editShop(this.selectedRow);
+                this.dialogFormVisible = false;
+                if (res.data.status === 1) {
+                    this.$message({
+                        type: 'success',
+                        message: '更新店铺信息成功'
+                    });
+                    this.getShopList();
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: res.data.message
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+            }
         },
         changePage(value) {
             this.currentPage = value;
@@ -189,22 +215,51 @@ export default {
                     phone: item.phone,
                     score: item.rating,
                     sale: item.recent_order_num,
-                    type: item.category
+                    type: item.category,
+                    img_url: item.image_path
                 });
             }
         },
         handleSelect(item) {
             console.log(item);
         },
-        querySearchAsync(queryString, cb) {
-            var restaurants = this.restaurants;
-            var results = queryString ?
-                restaurants.filter(this.createStateFilter(queryString)) :
-                restaurants;
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => {
-                cb(results);
-            }, 3000 * Math.random());
+        async querySearchAsync(queryString, cb) {
+            const res = await searchplace(this.city.data.id, queryString);
+            console.log(res.data);
+            if(res.data instanceof Array){
+                
+            }
+            // var restaurants = this.restaurants;
+            // var results = queryString ?
+            //     restaurants.filter(this.createStateFilter(queryString)) :
+            //     restaurants;
+            // clearTimeout(this.timeout);
+            // this.timeout = setTimeout(() => {
+            //     cb(results);
+            // }, 3000 * Math.random());
+        },
+        // 图片
+        handleServiceAvatarScucess(res, file) {
+            console.log(res);
+            if (res.status === 1) {
+                console.log('2222');
+                this.selectedRow.img_url = res.image_path;
+                console.log(this.selectedRow.img_url);
+            } else {
+                this.$message.error('图片上传失败');
+            }
+        },
+        beforeAvatarUpload(file) {
+            const isJPG = file.type === 'image/jpeg';
+            const isLt2M = file.size / 1024 / 1024 < 2;
+
+            if (!isJPG) {
+                this.$message.error('上传头像图片只能是 JPG 格式!');
+            }
+            if (!isLt2M) {
+                this.$message.error('上传头像图片大小不能超过 2MB!');
+            }
+            return isJPG && isLt2M;
         }
     }
 };
