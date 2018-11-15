@@ -2,40 +2,41 @@
 <div class="add-shop">
     <el-form ref="form" :model="form" label-width="120px">
         <el-form-item label="店铺名称">
-            <el-input v-model="form.shopName"></el-input>
+            <el-input v-model="form.name"></el-input>
         </el-form-item>
         <el-form-item label="详细地址">
-            <el-autocomplete v-model="form.shopAddr" :fetch-suggestions="querySearchAsync" placeholder="请输入地址" @select="handleSelect"></el-autocomplete>
+            <el-autocomplete v-model="form.address" :fetch-suggestions="querySearchAsync" placeholder="请输入地址" @select="handleSelect"></el-autocomplete>
+            <div>当前城市： {{city.name}}</div>
         </el-form-item>
         <el-form-item label="联系电话">
             <el-input v-model="form.phone"></el-input>
         </el-form-item>
         <el-form-item label="店铺简介">
-            <el-input v-model="form.shopInfo"></el-input>
+            <el-input v-model="form.description"></el-input>
         </el-form-item>
         <el-form-item label="店铺标语">
-            <el-input v-model="form.slogan"></el-input>
+            <el-input v-model="form.promotion_info"></el-input>
         </el-form-item>
         <el-form-item label="店铺分类">
-            <el-cascader :options="form.options" v-model="selectedOptions3"></el-cascader>
+            <el-cascader :options="shopKinds" v-model="selectedOptions3"></el-cascader>
         </el-form-item>
         <el-form-item label="店铺特点">
             <el-row :gutter="20">
-                品牌保证 <el-switch v-model="form.character.value1" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
-                蜂鸟专送 <el-switch v-model="form.character.value2" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
-                新开店铺 <el-switch v-model="form.character.value3" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
+                品牌保证 <el-switch v-model="form.is_premium" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
+                蜂鸟专送 <el-switch v-model="form.delivery_mode" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
+                新开店铺 <el-switch v-model="form.new" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
             </el-row>
             <el-row :gutter="20" style="margin-left:0">
-                外卖保 <el-switch v-model="form.character.value4" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
-                准时达 <el-switch v-model="form.character.value5" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
-                开发票 <el-switch v-model="form.character.value6" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
+                外卖保 <el-switch v-model="form.bao" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
+                准时达 <el-switch v-model="form.zhun" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
+                开发票 <el-switch v-model="form.piao" active-color="#20a0ff" inactive-color="#bfcbd9"></el-switch>
             </el-row>
         </el-form-item>
         <el-form-item label="配送费">
-            <el-input-number v-model="form.shipFee" controls-position="right" :min="0"></el-input-number>
+            <el-input-number v-model="form.float_delivery_fee" controls-position="right" :min="0"></el-input-number>
         </el-form-item>
         <el-form-item label="起送价">
-            <el-input-number v-model="form.startPrice" controls-position="right" :min="0"></el-input-number>
+            <el-input-number v-model="form.float_minimum_order_amount" controls-position="right" :min="0"></el-input-number>
         </el-form-item>
         <el-form-item label="活动时间">
             <el-time-select placeholder="起始时间" v-model="form.startTime" :picker-options="{start: '05:30',step: '00:15',end: '23:30'}">
@@ -44,52 +45,49 @@
             </el-time-select>
         </el-form-item>
         <el-form-item label="上传店铺头像">
-            <el-upload class="avatar-uploader" action="https://jsonplaceholder.typicode.com/posts/" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-                <img v-if="avatarUrl" :src="avatarUrl" class="avatar">
+            <el-upload class="avatar-uploader" :action="baseUrl + '/v1/addimg/shop'" :show-file-list="false" :on-success="handleAvatarSuccessA" :before-upload="beforeAvatarUpload">
+                <img v-if="form.image_path" :src="baseUrlImage + form.image_path" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
         </el-form-item>
         <el-form-item label="上传营业执照">
-            <el-upload class="avatar-uploader" action="https://jsonplaceholder.typicode.com/posts/" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-                <img v-if="licenseUrl" :src="licenseUrl" class="avatar">
+            <el-upload class="avatar-uploader" :action="baseUrl + '/v1/addimg/shop'" :show-file-list="false" :on-success="handleAvatarSuccessB" :before-upload="beforeAvatarUpload">
+                <img v-if="form.catering_service_license_image" :src="baseUrlImage + form.catering_service_license_image" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
         </el-form-item>
         <el-form-item label="上传餐饮服务许可证">
-            <el-upload class="avatar-uploader" action="https://jsonplaceholder.typicode.com/posts/" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-                <img v-if="serviceUrl" :src="serviceUrl" class="avatar">
+            <el-upload class="avatar-uploader" :action="baseUrl + '/v1/addimg/shop'" :show-file-list="false" :on-success="handleAvatarSuccessC" :before-upload="beforeAvatarUpload">
+                <img v-if="form.business_license_image" :src="baseUrlImage + form.business_license_image" class="avatar">
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
         </el-form-item>
         <el-form-item label="优惠活动">
-            <el-select v-model="selectedOffer" placeholder="请选择">
-                <el-option v-for="item in form.offers" :key="item.value" :label="item.label" :value="item.value">
+            <el-select v-model="selectedOffer" @change="currentAct" placeholder="请选择">
+                <el-option class="el-select-dropdown__item" v-for="item in preActivites" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
             </el-select>
         </el-form-item>
         <el-form-item>
-            <el-table :data="form.tableData" style="width: 100%">
+            <el-table :data="actLists" style="width: 100%">
                 <el-table-column label="活动标题" width="120">
                     <template slot-scope="scope">
-                        <i class="el-icon-time"></i>
-                        <span style="margin-left: 10px">{{ scope.row.actTitle }}</span>
+                        <span style="margin-left: 10px">{{ scope.row.icon_name }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column label="活动名称" width="120">
                     <template slot-scope="scope">
-                        <i class="el-icon-time"></i>
-                        <span style="margin-left: 10px">{{ scope.row.actName }}</span>
+                        <span style="margin-left: 10px">{{ scope.row.name }}</span>
                     </template>
                 </el-table-column>
                 <el-table-column label="活动详情" width="120">
                     <template slot-scope="scope">
-                        <i class="el-icon-time"></i>
-                        <span style="margin-left: 10px">{{ scope.row.actInfo }}</span>
+                        <span style="margin-left: 10px">{{ scope.row.description }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="操作" style="text-align:right">
                     <template slot-scope="scope">
-                        <el-button size="mini" type="danger" @click="deleteAct(scope.$index, scope.row)">删除</el-button>
+                        <el-button size="mini" type="danger" @click="deleteAct(scope.$index)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -102,344 +100,157 @@
 </template>
 
 <script>
+import {
+    baseUriImage,
+    foodCategory,
+    cityGuess,
+    searchplace,
+    addShop,
+    baseUri
+} from "../service/getData.js";
 export default {
     data() {
         return {
             form: {
-                shopName: "", // 店铺名称
-                shopAddr: "", // 店铺地址
-                phone: "", // 手机号
-                shopInfo: "", // 店铺简介
-                slogan: "", // 店铺标语
-                options: [{
-                        // 店铺分类
-                        value: "zhinan",
-                        label: "指南",
-                        children: [{
-                                value: "shejiyuanze",
-                                label: "设计原则"
-                            },
-                            {
-                                value: "daohang",
-                                label: "导航"
-                            }
-                        ]
-                    },
-                    {
-                        value: "zujian",
-                        label: "组件",
-                        children: [{
-                                value: "basic",
-                                label: "Basic"
-                            },
-                            {
-                                value: "form",
-                                label: "Form"
-                            },
-                            {
-                                value: "data",
-                                label: "Data"
-                            },
-                            {
-                                value: "notice",
-                                label: "Notice"
-                            },
-                            {
-                                value: "navigation",
-                                label: "Navigation"
-                            },
-                            {
-                                value: "others",
-                                label: "Others"
-                            }
-                        ]
-                    },
-                    {
-                        value: "ziyuan",
-                        label: "资源",
-                        children: [{
-                                value: "axure",
-                                label: "Axure Components"
-                            },
-                            {
-                                value: "sketch",
-                                label: "Sketch Templates"
-                            },
-                            {
-                                value: "jiaohu",
-                                label: "组件交互文档"
-                            }
-                        ]
-                    }
-                ],
-                character: {
-                    value1: true,
-                    value2: true,
-                    value3: true,
-                    value4: true,
-                    value5: true,
-                    value6: true
-                },
-                shipFee: 5,
-                startPrice: 20,
-                startTime: "",
-                endTime: "",
-                offers: [{
-                        value: "选项1",
-                        label: "黄金糕"
-                    },
-                    {
-                        value: "选项2",
-                        label: "双皮奶"
-                    },
-                    {
-                        value: "选项3",
-                        label: "蚵仔煎"
-                    },
-                    {
-                        value: "选项4",
-                        label: "龙须面"
-                    },
-                    {
-                        value: "选项5",
-                        label: "北京烤鸭"
-                    }
-                ],
-                tableData: [{
-                        actTitle: "活动1",
-                        actName: "活动名称1",
-                        actInfo: "活动详情1"
-                    },
-                    {
-                        actTitle: "活动2",
-                        actName: "活动名称2",
-                        actInfo: "活动详情2"
-                    },
-                    {
-                        actTitle: "活动3",
-                        actName: "活动名称3",
-                        actInfo: "活动详情3"
-                    }
-                ]
+                name: "", //店铺名称
+                address: "", //详细地址
+                latitude: "", // 经度
+                longitude: "", // 纬度
+                description: "", //介绍
+                phone: "", // 联系电话
+                promotion_info: "", // 店铺标语
+                is_premium: true, // 品牌保证
+                delivery_mode: true, // 蜂鸟转送
+                new: true, // 新开店铺
+                bao: true, // 外卖保
+                zhun: true, // 准时宝
+                piao: true, // 开发票
+                float_delivery_fee: 5, //运费
+                float_minimum_order_amount: 20, //起价
+                startTime: "", // 活动开始时间
+                endTime: "", // 活动结束时间
+                image_path: "", // 店铺头像
+                business_license_image: "", // 营业执照
+                catering_service_license_image: "" // 餐饮许可
             },
-            selectedOptions3: ["zujian", "data", "tag"],
+            // 活动类别
+            preActivites: [{
+                value: '满减优惠',
+                label: '满减优惠'
+            }, {
+                value: '优惠大酬宾',
+                label: '优惠大酬宾'
+            }, {
+                value: '新用户立减',
+                label: '新用户立减'
+            }, {
+                value: '进店领券',
+                label: '进店领券'
+            }],
+            shopKinds: [],
+            selectedOptions3: [],
+            actLists: [], // 活动列表
             restaurants: [],
             timeout: null,
-            avatarUrl: "",
-            serviceUrl: "",
-            licenseUrl: "",
-            selectedOffer: ""
+            selectedOffer: "",
+            city: {},
+            baseUrl: "",
+            baseUrlImage: ""
         };
     },
+    created() {
+        this.initData();
+    },
+    mounted() {
+        // this.restaurants = this.detailAddr();
+    },
     methods: {
-        onSubmit() {
-            console.log("submit!");
-        },
-        loadAll() {
-            return [{
-                    value: "三全鲜食（北新泾店）",
-                    address: "长宁区新渔路144号"
-                },
-                {
-                    value: "Hot honey 首尔炸鸡（仙霞路）",
-                    address: "上海市长宁区淞虹路661号"
-                },
-                {
-                    value: "新旺角茶餐厅",
-                    address: "上海市普陀区真北路988号创邑金沙谷6号楼113"
-                },
-                {
-                    value: "泷千家(天山西路店)",
-                    address: "天山西路438号"
-                },
-                {
-                    value: "胖仙女纸杯蛋糕（上海凌空店）",
-                    address: "上海市长宁区金钟路968号1幢18号楼一层商铺18-101"
-                },
-                {
-                    value: "贡茶",
-                    address: "上海市长宁区金钟路633号"
-                },
-                {
-                    value: "豪大大香鸡排超级奶爸",
-                    address: "上海市嘉定区曹安公路曹安路1685号"
-                },
-                {
-                    value: "茶芝兰（奶茶，手抓饼）",
-                    address: "上海市普陀区同普路1435号"
-                },
-                {
-                    value: "十二泷町",
-                    address: "上海市北翟路1444弄81号B幢-107"
-                },
-                {
-                    value: "星移浓缩咖啡",
-                    address: "上海市嘉定区新郁路817号"
-                },
-                {
-                    value: "阿姨奶茶/豪大大",
-                    address: "嘉定区曹安路1611号"
-                },
-                {
-                    value: "新麦甜四季甜品炸鸡",
-                    address: "嘉定区曹安公路2383弄55号"
-                },
-                {
-                    value: "Monica摩托主题咖啡店",
-                    address: "嘉定区江桥镇曹安公路2409号1F，2383弄62号1F"
-                },
-                {
-                    value: "浮生若茶（凌空soho店）",
-                    address: "上海长宁区金钟路968号9号楼地下一层"
-                },
-                {
-                    value: "NONO JUICE  鲜榨果汁",
-                    address: "上海市长宁区天山西路119号"
-                },
-                {
-                    value: "CoCo都可(北新泾店）",
-                    address: "上海市长宁区仙霞西路"
-                },
-                {
-                    value: "快乐柠檬（神州智慧店）",
-                    address: "上海市长宁区天山西路567号1层R117号店铺"
-                },
-                {
-                    value: "Merci Paul cafe",
-                    address: "上海市普陀区光复西路丹巴路28弄6号楼819"
-                },
-                {
-                    value: "猫山王（西郊百联店）",
-                    address: "上海市长宁区仙霞西路88号第一层G05-F01-1-306"
-                },
-                {
-                    value: "枪会山",
-                    address: "上海市普陀区棕榈路"
-                },
-                {
-                    value: "纵食",
-                    address: "元丰天山花园(东门) 双流路267号"
-                },
-                {
-                    value: "钱记",
-                    address: "上海市长宁区天山西路"
-                },
-                {
-                    value: "壹杯加",
-                    address: "上海市长宁区通协路"
-                },
-                {
-                    value: "唦哇嘀咖",
-                    address: "上海市长宁区新泾镇金钟路999号2幢（B幢）第01层第1-02A单元"
-                },
-                {
-                    value: "爱茜茜里(西郊百联)",
-                    address: "长宁区仙霞西路88号1305室"
-                },
-                {
-                    value: "爱茜茜里(近铁广场)",
-                    address: "上海市普陀区真北路818号近铁城市广场北区地下二楼N-B2-O2-C商铺"
-                },
-                {
-                    value: "鲜果榨汁（金沙江路和美广店）",
-                    address: "普陀区金沙江路2239号金沙和美广场B1-10-6"
-                },
-                {
-                    value: "开心丽果（缤谷店）",
-                    address: "上海市长宁区威宁路天山路341号"
-                },
-                {
-                    value: "超级鸡车（丰庄路店）",
-                    address: "上海市嘉定区丰庄路240号"
-                },
-                {
-                    value: "妙生活果园（北新泾店）",
-                    address: "长宁区新渔路144号"
-                },
-                {
-                    value: "香宜度麻辣香锅",
-                    address: "长宁区淞虹路148号"
-                },
-                {
-                    value: "凡仔汉堡（老真北路店）",
-                    address: "上海市普陀区老真北路160号"
-                },
-                {
-                    value: "港式小铺",
-                    address: "上海市长宁区金钟路968号15楼15-105室"
-                },
-                {
-                    value: "蜀香源麻辣香锅（剑河路店）",
-                    address: "剑河路443-1"
-                },
-                {
-                    value: "北京饺子馆",
-                    address: "长宁区北新泾街道天山西路490-1号"
-                },
-                {
-                    value: "饭典*新简餐（凌空SOHO店）",
-                    address: "上海市长宁区金钟路968号9号楼地下一层9-83室"
-                },
-                {
-                    value: "焦耳·川式快餐（金钟路店）",
-                    address: "上海市金钟路633号地下一层甲部"
-                },
-                {
-                    value: "动力鸡车",
-                    address: "长宁区仙霞西路299弄3号101B"
-                },
-                {
-                    value: "浏阳蒸菜",
-                    address: "天山西路430号"
-                },
-                {
-                    value: "四海游龙（天山西路店）",
-                    address: "上海市长宁区天山西路"
-                },
-                {
-                    value: "樱花食堂（凌空店）",
-                    address: "上海市长宁区金钟路968号15楼15-105室"
-                },
-                {
-                    value: "壹分米客家传统调制米粉(天山店)",
-                    address: "天山西路428号"
-                },
-                {
-                    value: "福荣祥烧腊（平溪路店）",
-                    address: "上海市长宁区协和路福泉路255弄57-73号"
-                },
-                {
-                    value: "速记黄焖鸡米饭",
-                    address: "上海市长宁区北新泾街道金钟路180号1层01号摊位"
-                },
-                {
-                    value: "红辣椒麻辣烫",
-                    address: "上海市长宁区天山西路492号"
-                },
-                {
-                    value: "(小杨生煎)西郊百联餐厅",
-                    address: "长宁区仙霞西路88号百联2楼"
-                },
-                {
-                    value: "阳阳麻辣烫",
-                    address: "天山西路389号"
-                },
-                {
-                    value: "南拳妈妈龙虾盖浇饭",
-                    address: "普陀区金沙江路1699号鑫乐惠美食广场A13"
+        // 初始化
+        async initData() {
+            try {
+                // 食品分类
+                this.baseUrl = baseUri;
+                this.baseUrlImage = baseUriImage;
+                const city = await cityGuess();
+                this.city = city.data;
+                const res = await foodCategory();
+                for (const item of res.data) {
+                    const categroyA = {
+                        value: item.name,
+                        label: item.name,
+                        children: []
+                    };
+                    for (const data of item.sub_categories) {
+                        categroyA.children.push({
+                            value: data.name,
+                            label: data.name
+                        });
+                    }
+                    this.selectedOptions3.push(item.name);
+                    this.shopKinds.push(categroyA);
                 }
-            ];
+            } catch (error) {
+                console.log(error);
+            }
         },
-        querySearchAsync(queryString, cb) {
-            var restaurants = this.restaurants;
-            var results = queryString ?
-                restaurants.filter(this.createStateFilter(queryString)) :
-                restaurants;
-
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => {
-                cb(results);
-            }, 3000 * Math.random());
+        // 保存
+        async onSubmit() {
+            Object.assign(this.form, {
+                activities: this.actLists
+            }, {
+                category: this.selectedOptions3.join('/')
+            });
+            const res = await addShop(this.form);
+            if (res.data.status === 1) {
+                this.$message.success(res.data.sussess);
+                this.form = {
+                    name: "",
+                    address: "",
+                    latitude: "",
+                    longitude: "",
+                    description: "",
+                    phone: "",
+                    promotion_info: "",
+                    is_premium: true,
+                    delivery_mode: true,
+                    new: true,
+                    bao: true,
+                    zhun: true,
+                    piao: true,
+                    float_delivery_fee: 5,
+                    float_minimum_order_amount: 20,
+                    startTime: "",
+                    endTime: "",
+                    image_path: "",
+                    business_license_image: "",
+                    catering_service_license_image: ""
+                };
+            } else {
+                this.$message.error(res.data.message);
+            }
+        },
+        // 详细地址
+        async querySearchAsync(queryString, cb) {
+            // 城市位置
+            try {
+                if (queryString) {
+                    const res = await searchplace(this.city.id, queryString);
+                    console.log(res.data);
+                    if (res.data instanceof Array) {
+                        res.data.map(item => {
+                            item.value = item.address;
+                            return item;
+                        })
+                        cb(res.data);
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        handleSelect(address) {
+            this.form.latitude = address.latitude;
+            this.form.longitude = address.longitude;
         },
         createStateFilter(queryString) {
             return state => {
@@ -448,14 +259,38 @@ export default {
                 );
             };
         },
-        handleSelect(item) {
-            console.log(item);
+        // 上传图片
+        handleAvatarSuccessA(res, file) {
+            if (res.status === 1) {
+                this.form.image_path = res.image_path;
+            } else {
+                this.$message({
+                    type: 'error',
+                    message: '上传失败'
+                })
+            }
         },
-        handleAvatarSuccess(res, file) {
-            this.avatarUrl = URL.createObjectURL(file.raw);
-            this.serviceUrl = URL.createObjectURL(file.raw);
-            this.licenseUrl = URL.createObjectURL(file.raw);
+        handleAvatarSuccessB(res, file) {
+            if (res.status === 1) {
+                this.form.catering_service_license_image = res.image_path;
+            } else {
+                this.$message({
+                    type: 'error',
+                    message: '上传失败'
+                })
+            }
         },
+        handleAvatarSuccessC(res, file) {
+            if (res.status === 1) {
+                this.form.business_license_image = res.image_path;
+            } else {
+                this.$message({
+                    type: 'error',
+                    message: '上传失败'
+                })
+            }
+        },
+        // 验证图片
         beforeAvatarUpload(file) {
             const isJPG = file.type === "image/jpeg";
             const isLt2M = file.size / 1024 / 1024 < 2;
@@ -468,19 +303,66 @@ export default {
             }
             return isJPG && isLt2M;
         },
-        deleteAct(index, row) {
-            console.log(index);
-            console.log(row);
+        // 删除优惠活动
+        deleteAct(index) {
+            this.actLists.splice(index, 1);
+        },
+        // 选中当前优惠活动
+        currentAct(curValue) {
+            let curList = {};
+            this.$prompt('请输入活动详情', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+            }).then(({
+                value
+            }) => {
+                if (value === null) {
+                    this.$message({
+                        type: 'info',
+                        message: '请输入活动详情'
+                    })
+                } else {
+                    switch (curValue) {
+                        case '满减优惠':
+                            curList = {
+                                icon_name: "减",
+                                name: "满减优惠",
+                                description: value
+                            };
+                            break;
+                        case '优惠大酬宾':
+                            curList = {
+                                icon_name: "特",
+                                name: "优惠大酬宾",
+                                description: value
+                            };
+                            break;
+                        case '新用户立减':
+                            curList = {
+                                icon_name: "新",
+                                name: "新用户立减",
+                                description: value
+                            };
+                            break;
+                        case '进店领券':
+                            curList = {
+                                icon_name: "券",
+                                name: "进店领券",
+                                description: value
+                            };
+                            break;
+                    }
+                    this.actLists.push(curList);
+                }
+            })
+
         }
-    },
-    mounted() {
-        this.restaurants = this.loadAll();
     }
 };
 </script>
 
-<style lang="less" scoped>
-@import '../style/common';
+<style lang="less">
+@import "../style/common";
 
 .add-shop {
     padding: 20px 550px 20px 200px !important;
@@ -496,5 +378,35 @@ export default {
 
 .add-food {
     margin-top: 30px;
+}
+
+.el-select-dropdown__item {
+    padding: 8px 10px;
+    line-height: 1.5;
+    height: 36px;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    word-break: border-box;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.el-select-dropdown__item>span {
+    line-height: 1.5;
+}
+
+.el-select-dropdown__item.selected {
+    color: #fff;
+    background-color: #409EFF;
+}
+
+.el-table th.is-leaf:last-child {
+    text-align: right;
+    padding-right: 15px;
+}
+
+.el-table td:last-child {
+    text-align: right;
 }
 </style>

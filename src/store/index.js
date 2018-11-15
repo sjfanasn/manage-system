@@ -8,16 +8,21 @@ const state = {
     }
 }
 const mutations = {
-    
+    saveAdminInfo(state, adminInfo) { 
+        state.adminInfo = adminInfo;
+    }
 }
 const actions = {
     async getAdminData({ commit }) {
-        console.log('3333');
         try {
             const res = await getAdminInfo();
-            console.log(res);
+            if (res.data.status === 1) {
+                commit('saveAdminInfo', res.data.data);
+            } else { 
+                throw new Error(res);
+            }
         } catch (err) {
-            console.log(err);
+            console.log('您尚未登陆或者session失效');
         }
     }
 }

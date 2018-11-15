@@ -90,7 +90,7 @@ import {
     cityGuess,
     getShopCount,
     getShoplist,
-    shopEdit,
+    foodCategory,
     editShop,
     searchplace
 } from "../service/getData.js";
@@ -134,8 +134,8 @@ export default {
                 console.log(error);
             }
         },
-        addFood(index, rows) {
-            console.log();
+        addFood(index, row) {
+            this.$router.push({path:'addGoods',query:{restaurant_id:row.id}});
         },
         deleteRow(index, rows) {
             rows.splice(index, 1);
@@ -146,7 +146,7 @@ export default {
             this.selectedRow = row;
             this.currentCategory = row.type.split("/");
             try {
-                const shopInfo = await shopEdit();
+                const shopInfo = await foodCategory();
                 for (const item of shopInfo.data) {
                     if (shopInfo.data.length) {
                         let data = {

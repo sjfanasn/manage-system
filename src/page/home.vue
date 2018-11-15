@@ -41,6 +41,15 @@
 
 <script>
 import tendency from "../components/tendency";
+import {
+    userCount,
+    orderCount,
+    adminCount,
+    getUserCount,
+    adminDayCount,
+    getOrderCount
+} from "../service/getData.js";
+import dtime from "time-formater";
 export default {
     data() {
         return {
@@ -54,12 +63,62 @@ export default {
                 orderTotal: 0,
                 adminTotal: 0
             },
-            sevenDay: ['2018-10-07', '2018-10-08', '2018-10-09', '2018-10-10', '2018-10-11', '2018-10-12'],
-            sevenData: [[0, 5, 10, 100, 5, 100],[100, 4, 50, 10, 5, 7],[3, 0, 4, 160, 6, 10]]
+            sevenDay: [],
+            sevenData: [[],[],[]]
         };
+    },
+    created() {
+        this.initData()
+    },
+    mounted(){
+        this.getSevenData();
     },
     components: {
         tendency
+    },
+    methods: {
+        async initData() {
+           for (let i = 6; i > -1; i--) {
+                const date = dtime(new Date().getTime() - 86400000 * i).format("YYYY-MM-DD");
+                this.sevenDay.push(date);
+            }
+            const today = dtime().format("YYYY-MM-DD");
+            Promise.all([userCount(today), orderCount(today), adminDayCount(today), getUserCount(), getOrderCount(), adminCount()])
+                .then(res => {
+                    this.add = {
+                        userNum: res[0].data.count,
+                        orderNum: res[1].data.count,
+                        adminNum: res[2].data.count
+                    };
+                    this.total = {
+                        userTotal: res[3].data.count,
+                        orderTotal: res[4].data.count,
+                        adminTotal: res[5].data.count
+                    }
+                }).catch(err => {
+                    console.log(err);
+                })
+        },
+        async getSevenData() {
+            const apiArr = [[],[],[]];
+            this.sevenDay.forEach(item => {
+                apiArr[0].push(userCount(item));
+                apiArr[1].push(orderCount(item));
+                apiArr[2].push(adminDayCount(item));
+            })
+            const promiseArr = [...apiArr[0], ...apiArr[1], ...apiArr[2]];
+            Promise.all(promiseArr).then(res => {
+                const arr = [[],[],[]];
+                res.forEach((item, index) => {
+                    if (item.status === 200) {
+                        arr[Math.floor(index / 7)].push(item.data.count);
+                    }
+                })
+                this.sevenData = arr;
+            }).catch(err => {
+                console.log(err);
+            })
+        }
     }
 };
 </script>
