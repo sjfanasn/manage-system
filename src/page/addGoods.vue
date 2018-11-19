@@ -2,7 +2,7 @@
 <div class="sort">
     <div class="food-sort">
         <div style="text-align:center;margin-bottom:20px;">选择食品种类</div>
-        <el-form ref="form" :model="form" label-width="120px" class="sort-form">
+        <el-form ref="forms" :model="form" label-width="120px" class="sort-form">
             <el-form-item label="食品种类">
                 <el-select v-model="form.selectFoodKind" placeholder="请选择活动区域">
                     <el-option v-for="item in form.foodKinds" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -26,8 +26,8 @@
     <div class="add-food">
         <div style="text-align:center;margin-bottom:20px;">添加食品</div>
         <div class="add-food-form">
-            <el-form ref="form" :model="foodForm" label-width="120px" class="sort-form">
-                <el-form-item label="食品名称">
+            <el-form ref="form" :model="foodForm" :rules="rules" label-width="120px" class="sort-form">
+                <el-form-item label="食品名称" prop="name">
                     <el-input v-model="foodForm.name"></el-input>
                 </el-form-item>
                 <el-form-item label="食品活动">
@@ -139,6 +139,12 @@ export default {
                     price: 20
                 }]
             },
+            rules: {
+                name: [{
+                    required: true,
+                    message: "请输入食品名称"
+                }]
+            },
             addSpecsForm: {
                 specs: "",
                 packing_fee: 0,
@@ -154,7 +160,7 @@ export default {
                     label: "招牌"
                 }
             ],
-            
+
             restaurant_id: 0,
             baseUrl: "",
             baseImageUrl: "",
@@ -208,22 +214,31 @@ export default {
                 category_id: this.selectedValue.id,
                 restaurant_id: this.restaurant_id
             };
-            const res = await addFood(query);
-            if (res.data.status === 1) {
-                this.$message.success(res.data.success);
-                this.foodForm = {
-                    name: "",
-                    activity: "",
-                    image_path: "",
-                    attributes: [],
-                    specs: [{
-                        specs: "默认",
-                        packing_fee: 0,
-                        price: 20
-                    }]
+            this.$refs["form"].validate(async valid => {
+                if (valid) {
+                    const res = await addFood(query);
+                    if (res.data.status === 1) {
+                        this.$message.success(res.data.success);
+                        this.foodForm = {
+                            name: "",
+                            activity: "",
+                            image_path: "",
+                            attributes: [],
+                            specs: [{
+                                specs: "默认",
+                                packing_fee: 0,
+                                price: 20
+                            }]
+                        };
+                    }
+                } else {
+                    this.$notify({
+                        title: "错误",
+                        message: "请检查输入是否正确",
+                        offers: 100
+                    });
                 }
-                
-            }
+            });
         },
         async onCategorySubmit() {
             const query = {

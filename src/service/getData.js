@@ -133,3 +133,6 @@ export const addFood = data => axios({
     url: baseUri + '/shopping/addfood',
     data:data
 })
+
+// 用户信息，饼状图
+export const getUserCity = () => axios(baseUri + '/v1/user/city/count');

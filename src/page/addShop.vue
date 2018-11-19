@@ -1,15 +1,15 @@
 <template>
 <div class="add-shop">
-    <el-form ref="form" :model="form" label-width="120px">
-        <el-form-item label="店铺名称">
+    <el-form ref="form" :rules="rules" :model="form" label-width="120px">
+        <el-form-item label="店铺名称" prop="name">
             <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="详细地址">
+        <el-form-item label="详细地址" prop="address">
             <el-autocomplete v-model="form.address" :fetch-suggestions="querySearchAsync" placeholder="请输入地址" @select="handleSelect"></el-autocomplete>
             <div>当前城市： {{city.name}}</div>
         </el-form-item>
-        <el-form-item label="联系电话">
-            <el-input v-model="form.phone"></el-input>
+        <el-form-item label="联系电话" prop="phone">
+            <el-input v-model.number="form.phone" maxlength="11"></el-input>
         </el-form-item>
         <el-form-item label="店铺简介">
             <el-input v-model="form.description"></el-input>
@@ -133,6 +133,27 @@ export default {
                 business_license_image: "", // 营业执照
                 catering_service_license_image: "" // 餐饮许可
             },
+            rules: {
+                name: [{
+                    required: true,
+                    message: '请输入店铺名称',
+                    trigger: 'blur'
+                }],
+                address: [{
+                    required: true,
+                    message: '请输入详细地址',
+                    trigger: 'blur'
+                }],
+                phone: [{
+                        required: true,
+                        message: '请输入联系电话'
+                    },
+                    {
+                        type: 'number',
+                        message: '电话号码必须是数字'
+                    }
+                ]
+            },
             // 活动类别
             preActivites: [{
                 value: '满减优惠',
@@ -193,41 +214,51 @@ export default {
                 console.log(error);
             }
         },
-        // 保存
+        // 添加保存
         async onSubmit() {
             Object.assign(this.form, {
                 activities: this.actLists
             }, {
                 category: this.selectedOptions3.join('/')
             });
-            const res = await addShop(this.form);
-            if (res.data.status === 1) {
-                this.$message.success(res.data.sussess);
-                this.form = {
-                    name: "",
-                    address: "",
-                    latitude: "",
-                    longitude: "",
-                    description: "",
-                    phone: "",
-                    promotion_info: "",
-                    is_premium: true,
-                    delivery_mode: true,
-                    new: true,
-                    bao: true,
-                    zhun: true,
-                    piao: true,
-                    float_delivery_fee: 5,
-                    float_minimum_order_amount: 20,
-                    startTime: "",
-                    endTime: "",
-                    image_path: "",
-                    business_license_image: "",
-                    catering_service_license_image: ""
-                };
-            } else {
-                this.$message.error(res.data.message);
-            }
+            this.$refs['form'].validate(async (valid) => {
+                if (valid) {
+                    const res = await addShop(this.form);
+                    if (res.data.status === 1) {
+                        this.$message.success(res.data.sussess);
+                        this.form = {
+                            name: "",
+                            address: "",
+                            latitude: "",
+                            longitude: "",
+                            description: "",
+                            phone: "",
+                            promotion_info: "",
+                            is_premium: true,
+                            delivery_mode: true,
+                            new: true,
+                            bao: true,
+                            zhun: true,
+                            piao: true,
+                            float_delivery_fee: 5,
+                            float_minimum_order_amount: 20,
+                            startTime: "",
+                            endTime: "",
+                            image_path: "",
+                            business_license_image: "",
+                            catering_service_license_image: ""
+                        };
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                }else {
+                    this.$notify.error({
+                        title:'错误',
+                        message:'请检查输入是否正确',
+                        offset:100
+                    })
+                }
+            })
         },
         // 详细地址
         async querySearchAsync(queryString, cb) {
